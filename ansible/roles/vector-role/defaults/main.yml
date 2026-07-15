@@ -1,0 +1,5 @@
+---
+vector_clickhouse_host: "clickhouse" # Имя хоста или IP-адрес сервера ClickHouse
+vector_clickhouse_port: 8123
+vector_clickhouse_database: "logs"
+vector_clickhouse_table: "vector_logs"

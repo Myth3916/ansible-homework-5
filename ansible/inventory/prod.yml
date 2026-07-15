@@ -1,0 +1,22 @@
+all:
+  children:
+    clickhouse:
+      hosts:
+        clickhouse-host:
+          ansible_host: 89.169.131.131
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
+    vector:
+      hosts:
+        vector-host:
+          ansible_host: 192.168.10.11
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
+    lighthouse:
+      hosts:
+        lighthouse-host:
+          ansible_host: 51.250.88.128
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
+  vars:
+    ansible_python_interpreter: /usr/bin/python3

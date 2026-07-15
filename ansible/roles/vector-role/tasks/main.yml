@@ -1,0 +1,82 @@
+---
+- name: Download vector binary
+  ansible.builtin.get_url:
+    url: "https://packages.timber.io/vector/0.34.1/vector-0.34.1-x86_64-unknown-linux-gnu.tar.gz"
+    dest: "/tmp/vector.tar.gz"
+    mode: '0644'
+  become: true
+
+- name: Extract vector archive
+  ansible.builtin.unarchive:
+    src: "/tmp/vector.tar.gz"
+    dest: "/tmp/"
+    remote_src: true
+  become: true
+
+- name: Install vector binary
+  ansible.builtin.copy:
+    src: "/tmp/vector-x86_64-unknown-linux-gnu/bin/vector"
+    dest: "/usr/local/bin/vector"
+    mode: '0755'
+    remote_src: true
+  become: true
+
+- name: Create vector config directory
+  ansible.builtin.file:
+    path: "/etc/vector"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Create vector data directory
+  ansible.builtin.file:
+    path: "/var/lib/vector"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Template vector config
+  ansible.builtin.template:
+    src: vector.toml.j2
+    dest: /etc/vector/vector.toml
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Restart vector
+
+- name: Create systemd service for vector
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Vector
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/vector --config /etc/vector/vector.toml
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/vector.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: 
+    - Reload systemd
+    - Restart vector
+
+- name: Start and enable vector service
+  ansible.builtin.systemd:
+    name: vector
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true

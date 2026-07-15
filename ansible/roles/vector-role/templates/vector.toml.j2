@@ -1,0 +1,11 @@
+[sources.in]
+type = "demo_logs"
+format = "json"
+
+[sinks.out]
+type = "clickhouse"
+inputs = ["in"]
+endpoint = "http://{{ vector_clickhouse_host }}:{{ vector_clickhouse_port }}"
+table = "{{ vector_clickhouse_table }}"
+database = "{{ vector_clickhouse_database }}"
+compression = "none"

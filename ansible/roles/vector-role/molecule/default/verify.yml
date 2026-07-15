@@ -1,0 +1,72 @@
+---
+- name: Verify Vector installation
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check that vector binary exists
+      ansible.builtin.stat:
+        path: /usr/local/bin/vector
+      register: vector_binary
+
+    - name: Assert vector binary is present
+      ansible.builtin.assert:
+        that:
+          - vector_binary.stat.exists
+          - vector_binary.stat.executable
+        fail_msg: "Vector binary is missing or not executable!"
+        success_msg: "Vector binary is present and executable ✓"
+
+    - name: Check vector version
+      ansible.builtin.command: /usr/local/bin/vector --version
+      register: vector_version
+      changed_when: false
+
+    - name: Assert vector version output
+      ansible.builtin.assert:
+        that:
+          - "'vector' in vector_version.stdout"
+        fail_msg: "Vector version check failed!"
+        success_msg: "Vector version: {{ vector_version.stdout }} ✓"
+
+    - name: Check that vector config exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.toml
+      register: vector_config
+
+    - name: Assert vector config is present
+      ansible.builtin.assert:
+        that:
+          - vector_config.stat.exists
+        fail_msg: "Vector config file is missing!"
+        success_msg: "Vector config exists ✓"
+
+    - name: Validate vector config syntax
+      ansible.builtin.command: /usr/local/bin/vector validate --no-environment --config-toml /etc/vector/vector.toml
+      register: vector_validate
+      changed_when: false
+
+    - name: Assert vector config is valid
+      ansible.builtin.assert:
+        that:
+          - vector_validate.rc == 0
+        fail_msg: "Vector config validation failed: {{ vector_validate.stderr }}"
+        success_msg: "Vector config is valid ✓"
+
+    - name: Check that vector service is running
+      ansible.builtin.systemd:
+        name: vector
+      register: vector_service
+
+    - name: Assert vector service is active
+      ansible.builtin.assert:
+        that:
+          - vector_service.status.ActiveState == "active"
+        fail_msg: "Vector service is not running!"
+        success_msg: "Vector service is active ✓"
+
+    - name: Check that vector service is enabled
+      ansible.builtin.assert:
+        that:
+          - vector_service.status.UnitFileState == "enabled"
+        fail_msg: "Vector service is not enabled!"
+        success_msg: "Vector service is enabled ✓"
