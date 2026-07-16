@@ -1,0 +1,6 @@
+selinux
+lxml
+molecule<4.0.0
+molecule-podman
+jmespath
+ansible-compat<3.0.0
