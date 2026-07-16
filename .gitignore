@@ -29,3 +29,10 @@ Thumbs.db
 # Ansible
 *.retry
 ansible.cfg.bak
+
+
+# Tox
+.tox/
+
+# Molecule symlinks
+molecule/default/roles/
